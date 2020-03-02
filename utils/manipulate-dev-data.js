@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const fs = require('fs');
 const Post = require('./../models/postModel');
+const User = require('./../models/userModel');
 
 dotenv.config({
     path: './config.env'
@@ -9,6 +10,7 @@ dotenv.config({
 
 //* Top Level Code
 const posts = JSON.parse(fs.readFileSync('./dev-data/posts.json'));
+const users = JSON.parse(fs.readFileSync('./dev-data/users.json'));
 
 const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DB_PASSWORD);
 
@@ -22,7 +24,8 @@ mongoose.connect(DB, {
 //* Import all documents to a certain collection
 const importAll = async function() {
     try {
-        await Post.create(posts)
+        // await Post.create(posts)
+        await User.create(users)
         console.log('Documents imported successfully. 🎉')
     }
     catch(err) {
@@ -34,7 +37,8 @@ const importAll = async function() {
 //* Delete all documents in a certain collection
 const deleteAll = async function() {
     try {
-        await Post.deleteMany()
+        // await Post.deleteMany()l
+        await User.deleteMany()
         console.log('Documents deleted successfully. ❗')
     }
     catch(err) {

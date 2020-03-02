@@ -1,0 +1,62 @@
+[
+    {
+        "name": "Giovani",
+        "lastName": "Salvatore",
+        "userName": "giovani221",
+        "email": "giovani.home@example.io",
+        "password": "fc5e038d38a57032085441e7fe7010b0",
+        "notifications": [],
+        "userImage": "123818381471165612.png",
+        "bio": "Hi! I am giovani, nice to meet you.",
+        "location": "Venecia, Italy",
+        "website": "http://giovani-example.io"
+    },
+    {
+        "name": "Fernando",
+        "lastName": "Alviar",
+        "userName": "fernando993",
+        "email": "fernando.home@example.io",
+        "password": "870a31a220b564228a055cc7c30825ef",
+        "notifications": [],
+        "userImage": "12381938165612.png",
+        "bio": "Hi! I am Fernando, nice to meet you.",
+        "location": "Madrid, Spain",
+        "website": "http://fernando-example.io"
+    },
+    {
+        "name": "Dominique",
+        "lastName": "Canard",
+        "userName": "dominique288",
+        "email": "dominique.home@example.io",
+        "password": "adf64dc92f6a13ab63985896195b0102",
+        "notifications": [],
+        "userImage": "137177417716262.png",
+        "bio": "Hi! I am Dominique, nice to meet you.",
+        "location": "Paris, France",
+        "website": "http://dominique-example.io"
+    },
+    {
+        "name": "Joey",
+        "lastName": "Tribiani",
+        "userName": "joey717",
+        "email": "joey.home@example.io",
+        "password": "40cec4f7ed5ae3bb06488faab081cbbd",
+        "notifications": [],
+        "userImage": "8283813818276622.png",
+        "bio": "Hi! I am joey, nice to meet you.",
+        "location": "New York, USA",
+        "website": "http://giovani-example.io"
+    },
+    {
+        "name": "Franz",
+        "lastName": "Altenburg",
+        "userName": "franz828",
+        "email": "franz.home@example.io",
+        "password": "9716dbec9c739aa8b55fb5518884e0ed",
+        "notifications": [],
+        "userImage": "82838128883373.png",
+        "bio": "Hi! I am franz, nice to meet you.",
+        "location": "Hamburg, Germany",
+        "website": "http://franz-example.io"
+    }
+]
