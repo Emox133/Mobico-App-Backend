@@ -1,0 +1,3 @@
+exports.onCreateNotification = function (Model) {
+    
+};
