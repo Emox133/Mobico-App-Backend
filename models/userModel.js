@@ -42,14 +42,19 @@ const userSchema = new mongoose.Schema({
             message: 'Passwords are not the same.'
         }
     },
-    notifications: Array,
+    notifications: [
+        {
+            type: mongoose.Schema.ObjectId,
+        }
+    ],
     userImage: String,
     bio: String,
     location: {
         type: String,
         required: [true, 'Please provide your location.']
     },
-    website: String
+    website: String,
+    passwordChangedAt: Date
 })
 
 userSchema.pre('save', async function(next) {
@@ -64,8 +69,22 @@ userSchema.pre('save', async function(next) {
     next();
 });
 
+//? Compare Passwords
 userSchema.methods.comparePasswords = async function(upwd, candidatePassword) {
     return await bcrypt.compare(upwd, candidatePassword)
+};
+
+//? Changed Password
+userSchema.methods.changedPassword = function(jwtTimestamp) {
+    if(this.passwordChangedAt) {
+        const newTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+
+        // return true
+        return jwtTimestamp < newTimestamp
+    }
+
+    // Default
+    return false
 };
 
 const User = mongoose.model('User', userSchema);

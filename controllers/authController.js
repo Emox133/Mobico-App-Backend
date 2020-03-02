@@ -2,6 +2,7 @@ const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const jwt = require('jsonwebtoken');
 const AppError = require('./../utils/AppError');
+const {promisify} = require('util');
 
 // TODO: Signup
 // TODO: Login
@@ -13,6 +14,40 @@ const signToken = id => {
     })
 };
 
+exports.protectRoutes = catchAsync(async(req, res, next) => {
+    // 1. Get the token
+    let token;
+
+    if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        token = req.headers.authorization.split(' ')[1];
+    }
+
+    if(!token) {
+        return next(new AppError('Invalid token', 401));
+    }
+
+    // 2. Verify token
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    
+    const currentUser = await User.findById(decoded.id);
+
+    // 3. Check if user is not deleted in meantime
+    if(!currentUser) {
+        return next(new AppError('Owner of this token does no longer exist.', 401));
+    }
+
+    // 4. Check if user changed password in meantime
+    if(currentUser.changedPassword(decoded.iat)) {
+        return next(new AppError('Password was recently changed, please log in again'));
+    }
+
+    // Assing currently authenticated user to req.obj and send it further through "stack"
+    req.user = currentUser
+
+    next();
+});
+
+//* Signup
 exports.signup = catchAsync(async(req, res, next) => {
     const newUser = {
         name: req.body.name,
@@ -38,6 +73,7 @@ exports.signup = catchAsync(async(req, res, next) => {
     })
 });
 
+//* Login
 exports.login = catchAsync(async(req, res, next) => {
     // 1. Get the email and password 
     const {email, password} = req.body;
