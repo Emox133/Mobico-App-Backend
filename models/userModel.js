@@ -23,12 +23,12 @@ const userSchema = new mongoose.Schema({
     email: {
         type: String,
         unique: true,
-        validate: validator.isEmail
+        validate: [validator.isEmail, 'Please provide a valid email.']
     },
     password: {
         type: String,
         minlength: 5,
-        // maxlength: 12,
+        maxlength: 12,
         required: [true, 'Please provide a password.'],
         select: false
     },
@@ -52,17 +52,17 @@ const userSchema = new mongoose.Schema({
     website: String
 })
 
-// userSchema.pre('save', async function(next) {
-//     // 1. Check if the password is actually modified
-//     if(!this.isModified('password')) return next();
+userSchema.pre('save', async function(next) {
+    // 1. Check if the password is actually modified
+    if(!this.isModified('password')) return next();
     
-//     // 2. Hash the password with the cost of 12
-//     this.password = await bcrypt.hash(this.password, 12);
+    // 2. Hash the password with the cost of 12
+    this.password = await bcrypt.hash(this.password, 12);
 
-//     // 3. Remove confirm password before the doc is saved
-//     this.confirmPassword = undefined;
-//     next();
-// });
+    // 3. Remove confirm password before the doc is saved
+    this.confirmPassword = undefined;
+    next();
+});
 
 const User = mongoose.model('User', userSchema);
 

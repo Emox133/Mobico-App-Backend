@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const postsRouter = require('./routes/postRoutes');
+const usersRouter = require('./routes/userRoutes');
 const globalErrorHandler = require('./controllers/errorController');
 
 const app = express();
@@ -13,6 +14,7 @@ if(process.env.MODE === 'development') {
 
 //* Routes
 app.use('/api/v1/posts', postsRouter);
+app.use('/api/v1/users', usersRouter);
 
 //* All routes that do not exist
 app.all('*', (req, res, next) => {
