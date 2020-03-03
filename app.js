@@ -32,7 +32,9 @@ module.exports = app
 
 //TODO: Upload an image to a user
 //TODO: Get user data
-//TODO: Create Notifications
+//TODO: Create notifications
+//TODO: Comment post
+//TODO: Uncomment post
 
 //todo: later remove data leaking when liking and disliking posts
 
@@ -41,3 +43,4 @@ module.exports = app
 //TODO: ✔ 
 //TODO: Like post
 //TODO: Dislike post
+//TODO: Assign correct info on post creation 

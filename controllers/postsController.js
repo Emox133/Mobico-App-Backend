@@ -35,7 +35,15 @@ exports.getOnePost = catchAsync(async (req, res, next) => {
 
 // * Create a post
 exports.createPost = catchAsync(async(req, res, next) => {
-    const newPost = await Post.create(req.body)  
+    let person = [req.user.firstName, req.user.lastName];
+    person = person.toString();
+    const owner = person.split(',').join(' '); 
+
+    const newPost = await Post.create({
+        owner,
+        ownerId: req.user._id,
+        text: req.body.text
+    })
 
     res.status(201).json({
         status: 'success',

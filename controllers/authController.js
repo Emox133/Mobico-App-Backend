@@ -4,10 +4,6 @@ const jwt = require('jsonwebtoken');
 const AppError = require('./../utils/AppError');
 const {promisify} = require('util');
 
-// TODO: Signup
-// TODO: Login
-// TODO: Protection 
-
 const signToken = id => {
     return jwt.sign({id}, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRATION
@@ -49,8 +45,8 @@ exports.protectRoutes = catchAsync(async(req, res, next) => {
 
 //* Signup
 exports.signup = catchAsync(async(req, res, next) => {
-    const newUser = {
-        name: req.body.name,
+    const newUser = await User.create({
+        firstName: req.body.firstName,
         lastName: req.body.lastName,
         userName: req.body.userName,
         email: req.body.email,
@@ -61,9 +57,7 @@ exports.signup = catchAsync(async(req, res, next) => {
         bio: req.body.bio,
         location: req.body.location,
         website: req.body.website
-    };
-
-    await User.create(newUser)
+    });
 
     const token = signToken(newUser._id);
 

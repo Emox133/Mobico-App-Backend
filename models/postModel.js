@@ -5,6 +5,10 @@ const postsSchema = new mongoose.Schema({
         type: String,
         required: [true, 'A post has to have an owner']
     },
+    ownerId: {
+        type: mongoose.Schema.ObjectId,
+        select: false
+    },
     text: {
         type: String,
         minlength: [2, 'Post needs to be at least 2 characters long'],
