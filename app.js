@@ -34,6 +34,8 @@ module.exports = app
 //TODO: Get user data
 //TODO: Create Notifications
 
+//todo: later remove data leaking when liking and disliking posts
+
 //////////////
 
 //TODO: ✔ 

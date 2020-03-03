@@ -22,6 +22,10 @@ const sendDevErrors = (err, res) => {
     return new AppError(message, 400);
   };
 
+  const handleJWTExpired = () => {
+    return new AppError('Your token has expired. Please log in again.', 401);
+  };
+
 // !PRORDUCTION ENVIROMENT
 const sendProdErrors = (err, res) => {
     if(err.isOperational) {
@@ -48,6 +52,7 @@ module.exports = (err, req, res, next) => {
 
       if(error.name === 'CastError') error = handleCastError(error);
       if(error.code === 11000) error = handleDuplicateKeys(error);
+      if(error.name === 'TokenExpiredError') handleJWTExpired();
 
       sendProdErrors(error, res);
     }

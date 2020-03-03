@@ -53,9 +53,7 @@ exports.likePost = catchAsync(async(req, res, next) => {
         belongsTo: req.params.id
     };
     
-    // console.log(`Liked by: ${likeObj.owner} // like belongs to: ${likeObj.belongsTo}`);
-
-    // 2. Check if they exist 
+    // 2. Check if post and user still exist 
     if(!likeObj.owner) {
         return next(new AppError('User does no longer exist.', 404))
     } else if (!likeObj.belongsTo) {
@@ -87,10 +85,8 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
             owner: req.user._id,
             belongsTo: req.params.id
         };
-        
-        // console.log(`Liked by: ${likeObj.owner} // like belongs to: ${likeObj.belongsTo}`);
-    
-        // 2. Check if they exist 
+            
+        // 2. Check if post and user still exist 
         if(!likeObj.owner) {
             return next(new AppError('User does no longer exist.', 404))
         } else if (!likeObj.belongsTo) {
@@ -98,10 +94,15 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
         }
     
         // 3. Create a dislike and send the response
-        const like = await Like.findOneAndDelete({owner: likeObj.owner})
-    
+        // const like = await Like.findOneAndDelete({owner: likeObj.owner})
+        const like = await Like.findOneAndDelete({owner: req.user._id, belongsTo: req.params.id});
+
+        if(!like) {
+            return next(new AppError('You cannot dislike a post that you did not liked.', 403));
+        }
+        
         // 4. Update the like count in the particular post 
-        const post = await Post.findOneAndUpdate({_id: likeObj.belongsTo}, {$inc: {likeCount: -1}}, {
+        const post = await Post.findOneAndUpdate({_id: req.params.id, }, {$inc: {likeCount: -1}}, {
             new: true,
             runValidators: true
         });
