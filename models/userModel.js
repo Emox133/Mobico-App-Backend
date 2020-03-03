@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
         required: [true, 'Please tell us your last name.'],
         validate: [validator.isAlpha, 'Last name can only contain letters.']
     },
-    userName: {
+    username: {
         type: String,
         unique: true,
         required: [true, 'Please choose a username.'],
