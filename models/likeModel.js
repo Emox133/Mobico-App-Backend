@@ -4,7 +4,8 @@ const likeSchema = new mongoose.Schema({
     owner: {
         type: mongoose.Schema.ObjectId,
         ref: 'User',
-        required: [true, 'Like must belong to some user.']
+        required: [true, 'Like must belong to some user.'],
+        unique: true
     },
     belongsTo: {
         type: mongoose.Schema.ObjectId,
@@ -13,9 +14,6 @@ const likeSchema = new mongoose.Schema({
     }
 });
 
-likeSchema.pre('post', function() {
-    
-});
 
 const Like = mongoose.model('Like', likeSchema);
 

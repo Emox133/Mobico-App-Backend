@@ -11,4 +11,10 @@ router.route('/')
 router.route('/:id')
 .get(postsController.getOnePost)
 
+router.route('/:id/like')
+.post(authController.protectRoutes, postsController.likePost)
+
+router.route('/:id/dislike')
+.post(authController.protectRoutes, postsController.dislikePost)
+
 module.exports = router;

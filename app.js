@@ -29,3 +29,13 @@ app.use(globalErrorHandler);
 console.log(process.env.MODE);
 
 module.exports = app
+
+//TODO: Upload an image to a user
+//TODO: Get user data
+//TODO: Create Notifications
+
+//////////////
+
+//TODO: ✔ 
+//TODO: Like post
+//TODO: Dislike post

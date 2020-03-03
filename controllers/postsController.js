@@ -1,4 +1,5 @@
 const Post = require('./../models/postModel');
+const Like = require('./../models/likeModel');
 const AppError = require('./../utils/AppError');
 const catchAsync = require('./../utils/catchAsync');
 
@@ -44,4 +45,73 @@ exports.createPost = catchAsync(async(req, res, next) => {
     })
 });
 
+// * Like a post
+exports.likePost = catchAsync(async(req, res, next) => {
+    // 1. Get the currently loged in user and the post id
+    const likeObj = {
+        owner: req.user._id,
+        belongsTo: req.params.id
+    };
+    
+    // console.log(`Liked by: ${likeObj.owner} // like belongs to: ${likeObj.belongsTo}`);
+
+    // 2. Check if they exist 
+    if(!likeObj.owner) {
+        return next(new AppError('User does no longer exist.', 404))
+    } else if (!likeObj.belongsTo) {
+        return next(new AppError('Post does no longer exist.', 404))
+    }
+
+    // 3. Create a like and send the response
+    const like = await Like.create(likeObj)
+
+    // 4. Update the like count in the particular post 
+    const post = await Post.findOneAndUpdate({_id: likeObj.belongsTo}, {$inc: {likeCount: 1}}, {
+        new: true,
+        runValidators: true
+    });
+
+    res.status(201).json({
+        message: 'success',
+        data: {
+            like,
+            post    
+        }
+    })
+});
+
+// * Dislike a post
+exports.dislikePost = catchAsync(async (req, res, next) => {
+        // 1. Get the currently loged in user and the post id
+        const likeObj = {
+            owner: req.user._id,
+            belongsTo: req.params.id
+        };
+        
+        // console.log(`Liked by: ${likeObj.owner} // like belongs to: ${likeObj.belongsTo}`);
+    
+        // 2. Check if they exist 
+        if(!likeObj.owner) {
+            return next(new AppError('User does no longer exist.', 404))
+        } else if (!likeObj.belongsTo) {
+            return next(new AppError('Post does no longer exist.', 404))
+        }
+    
+        // 3. Create a dislike and send the response
+        const like = await Like.findOneAndDelete({owner: likeObj.owner})
+    
+        // 4. Update the like count in the particular post 
+        const post = await Post.findOneAndUpdate({_id: likeObj.belongsTo}, {$inc: {likeCount: -1}}, {
+            new: true,
+            runValidators: true
+        });
+    
+        res.status(201).json({
+            message: 'success',
+            data: {
+                like,
+                post    
+            }
+        })
+});
 

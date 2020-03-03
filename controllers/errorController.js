@@ -16,6 +16,12 @@ const sendDevErrors = (err, res) => {
     return new AppError(message, 400);
   };
 
+  const handleDuplicateKeys = err => {
+    const value = err.errmsg.match(/'[^'"]*'(?=(?:[^"]*"[^"]*")*[^"]*$)/g);
+    const message = `Duplicate key found ${value}. Please use another value.`;
+    return new AppError(message, 400);
+  };
+
 // !PRORDUCTION ENVIROMENT
 const sendProdErrors = (err, res) => {
     if(err.isOperational) {
@@ -41,6 +47,7 @@ module.exports = (err, req, res, next) => {
       let error = {...err};
 
       if(error.name === 'CastError') error = handleCastError(error);
+      if(error.code === 11000) error = handleDuplicateKeys(error);
 
       sendProdErrors(error, res);
     }
