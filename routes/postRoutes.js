@@ -10,6 +10,7 @@ router.route('/')
 
 router.route('/:id')
 .get(postsController.getOnePost)
+.delete(authController.protectRoutes, postsController.deletePost)
 
 router.route('/:id/like')
 .post(authController.protectRoutes, postsController.likePost)

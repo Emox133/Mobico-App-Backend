@@ -56,6 +56,17 @@ exports.createPost = catchAsync(async(req, res, next) => {
     })
 });
 
+// * Delete Post
+exports.deletePost = catchAsync(async(req, res, next) => {
+    const post = await Post.findOneAndDelete({ownerId: req.user._id, _id: req.params.id})
+
+    if(!post) return next(new AppError('You do not have permission to perform this kind of operation.', 403))
+
+    res.status(204).json({
+        message: 'success'
+    })
+});
+
 // * Like a post
 exports.likePost = catchAsync(async(req, res, next) => {
     // 1. Get the currently loged in user and the post id
