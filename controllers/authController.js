@@ -5,12 +5,7 @@ const AppError = require('./../utils/AppError');
 const {promisify} = require('util');
 const sendEmail = require('./../utils/nodemailer');
 const crypto = require('crypto');
-
-const signToken = id => {
-    return jwt.sign({id}, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRATION
-    })
-};
+const signToken = require('./../utils/signToken')
 
 exports.protectRoutes = catchAsync(async(req, res, next) => {
     // 1. Get the token
