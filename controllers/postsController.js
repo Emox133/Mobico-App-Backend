@@ -1,5 +1,6 @@
 const Post = require('./../models/postModel');
 const Like = require('./../models/likeModel');
+const Comment = require('./../models/commentModel');
 const AppError = require('./../utils/AppError');
 const catchAsync = require('./../utils/catchAsync');
 
@@ -16,19 +17,21 @@ exports.getAllPosts = catchAsync(async (req, res) => {
     })
 });
 
-
 // * Get one post
 exports.getOnePost = catchAsync(async (req, res, next) => {
     const post = await Post.findById(req.params.id).select('-__v')
 
-    if(!post) {
-        next(new AppError('There is no post with this ID.', 404));
-    }
+    const comments = await Comment.find({belongsTo: req.params.id})
+
+    if(!post) next(new AppError('There is no post with this ID.', 404));
+    
+    if(!comments) comments = []; 
 
     res.status(200).json({
         message: 'success',
         data: {
-            post
+            post,
+            comments
         }
     })
 });
@@ -72,7 +75,7 @@ exports.likePost = catchAsync(async(req, res, next) => {
     const like = await Like.create(likeObj)
 
     // 4. Update the like count in the particular post 
-    const post = await Post.findOneAndUpdate({_id: likeObj.belongsTo}, {$inc: {likeCount: 1}}, {
+    const post = await Post.findOneAndUpdate({_id: req.params.id}, {$inc: {likeCount: 1}}, {
         new: true,
         runValidators: true
     });
@@ -110,7 +113,7 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
         }
         
         // 4. Update the like count in the particular post 
-        const post = await Post.findOneAndUpdate({_id: req.params.id, }, {$inc: {likeCount: -1}}, {
+        const post = await Post.findOneAndUpdate({_id: req.params.id }, {$inc: {likeCount: -1}}, {
             new: true,
             runValidators: true
         });
@@ -124,3 +127,34 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
         })
 });
 
+// * Comment a post
+exports.commentPost = catchAsync(async (req, res, next) => {
+    // 1. Create an object related to post commenting
+    const newComment = await Comment.create({
+        owner: req.user._id,
+        belongsTo: req.params.id,
+        text: req.body.text
+    });
+    
+    // 2. Check if related data still exists
+    if(!newComment.owner) {
+        return next(new AppError('User does no longer exist.', 404))
+    } else if (!newComment.belongsTo) {
+        return next(new AppError('Post does no longer exist.', 404))
+    } 
+
+    // 3. Update the coresponding post
+    const post = await Post.findOneAndUpdate({_id: req.params.id}, {$inc: {commentCount: 1}}, {
+        new: true,
+        runValidators: true
+    }) 
+
+    // 4. If we get to this point , send the res
+    res.status(201).json({
+        message: 'success',
+        data: {
+            comment: newComment,
+            post
+        }
+    })
+});

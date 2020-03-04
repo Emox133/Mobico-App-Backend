@@ -13,8 +13,10 @@ router.route('/:id')
 
 router.route('/:id/like')
 .post(authController.protectRoutes, postsController.likePost)
-
 router.route('/:id/dislike')
 .post(authController.protectRoutes, postsController.dislikePost)
+
+router.route('/:id/comment')
+.post(authController.protectRoutes, postsController.commentPost)
 
 module.exports = router;
