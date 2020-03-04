@@ -12,6 +12,8 @@ router.route('/login')
 
 router.route('/forgotPassword')
 .post(authController.forgotPassword)
+router.route('/resetPassword/:token')
+.post(authController.resetPassword)
 
 router.route('/me')
 .get(authController.protectRoutes, userController.getUserData)
