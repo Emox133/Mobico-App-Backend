@@ -19,6 +19,8 @@ router.route('/me')
 
 router.route('/updateMyPassword')
 .patch(authController.protectRoutes, userController.updatePassword)
+router.route('/updateMe')
+.patch(authController.protectRoutes, userController.updateProfile)
 
 router.route('/deleteMe')
 .delete(authController.protectRoutes, userController.deleteMe)
