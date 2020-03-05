@@ -39,3 +39,12 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
     })
 });
 
+// * Deactivate/Delete profile
+exports.deleteMe = catchAsync(async (req, res, next) => {
+    await User.findByIdAndDelete(req.user._id)
+
+    res.status(204).json({
+        message: 'success',
+        data: null
+    })
+});

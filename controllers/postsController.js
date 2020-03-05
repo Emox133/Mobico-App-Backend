@@ -63,7 +63,8 @@ exports.deletePost = catchAsync(async(req, res, next) => {
     if(!post) return next(new AppError('You do not have permission to perform this kind of operation.', 403))
 
     res.status(204).json({
-        message: 'success'
+        message: 'success',
+        data: null
     })
 });
 
