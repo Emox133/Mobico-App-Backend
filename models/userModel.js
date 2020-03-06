@@ -48,7 +48,10 @@ const userSchema = new mongoose.Schema({
             type: mongoose.Schema.ObjectId,
         }
     ],
-    userImage: String,
+    userImage: {
+        type: String,
+        default: 'no-img.png'
+    },
     bio: String,
     location: {
         type: String,

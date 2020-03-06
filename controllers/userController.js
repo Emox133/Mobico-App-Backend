@@ -3,8 +3,10 @@ const Like = require('./../models/likeModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/AppError');
 const signToken = require('./../utils/signToken');
+const {uploadProfileImage} = require('./../utils/multer-alt');
+const cloudinary = require('cloudinary').v2;
 
- // 1. Choose which fields are allowed to be updated
+// Choose which fields are allowed to be updated
  const filteredBody = (obj, ...allowedFields) => {
     const newObj = {};
     Object.keys(obj).forEach(el => {
@@ -64,7 +66,20 @@ exports.updateProfile = catchAsync(async(req, res, next) => {
         return next(new AppError('This route is not for password changes.\n If you want to change your password, please use /updateMyPassword route'), 403);
     } 
 
+    if(Object.values(req.body).length === 0 && !req.files) {
+        return next(new AppError('Please provide some data to update', 400))
+    }
+
     const allowed = filteredBody(req.body, 'firstName', 'lastName', 'email', 'bio', 'location', 'username', 'website');
+
+    if(req.files) {
+         uploadProfileImage(req, cloudinary);
+         
+        // Cloud
+        await cloudinary.uploader.upload(req.files.joinedTemp, (err, img) => {
+            allowed.userImage = img.secure_url
+        })
+    }  
 
     const updatedUser = await User.findByIdAndUpdate(req.user._id, allowed, {
         new: true,
@@ -78,3 +93,4 @@ exports.updateProfile = catchAsync(async(req, res, next) => {
         }
     })
 });
+

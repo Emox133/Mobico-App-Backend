@@ -3,9 +3,17 @@ const morgan = require('morgan');
 const postsRouter = require('./routes/postRoutes');
 const usersRouter = require('./routes/userRoutes');
 const globalErrorHandler = require('./controllers/errorController');
+const fileupload = require('express-fileupload');
+const path = require('path');
+const os = require('os');
 
 const app = express();
 app.use(express.json());
+
+app.use(fileupload({
+    useTempFiles: true,
+    tempFileDir: os.tmpdir()
+}));
 
 //? 3rd party middlewares
 if(process.env.MODE === 'development') {
