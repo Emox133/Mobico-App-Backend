@@ -25,4 +25,7 @@ router.route('/updateMe')
 router.route('/deleteMe')
 .delete(authController.protectRoutes, userController.deleteMe)
 
+router.route('/notifications')
+.patch(authController.protectRoutes, userController.visitedNotifications)
+
 module.exports = router;

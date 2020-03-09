@@ -4,7 +4,6 @@ const postsRouter = require('./routes/postRoutes');
 const usersRouter = require('./routes/userRoutes');
 const globalErrorHandler = require('./controllers/errorController');
 const fileupload = require('express-fileupload');
-const path = require('path');
 const os = require('os');
 
 const app = express();

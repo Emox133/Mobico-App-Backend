@@ -43,14 +43,9 @@ const userSchema = new mongoose.Schema({
             message: 'Passwords are not the same.'
         }
     },
-    notifications: [
-        {
-            type: mongoose.Schema.ObjectId,
-        }
-    ],
     userImage: {
         type: String,
-        default: 'no-img.png'
+        default: 'https://res.cloudinary.com/de8nlvwpc/image/upload/v1583605946/wpjlsyqsodiokatqqlv4.png'
     },
     bio: String,
     location: {

@@ -1,5 +1,6 @@
 const User = require('./../models/userModel');
 const Like = require('./../models/likeModel');
+const Notification = require('./../models/notificationModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/AppError');
 const signToken = require('./../utils/signToken');
@@ -18,14 +19,17 @@ const cloudinary = require('cloudinary').v2;
 exports.getUserData = catchAsync(async(req, res, next) => {
     const user = await User.findById(req.user._id).select('-__v');
     const likes = await Like.find({owner: req.user._id})
+    const notifications = await Notification.find({recipient: req.user._id})
 
     if(!likes) likes = [];
+    if(!notifications) notifications = [];
 
     res.status(200).json({
         message: 'success',
         data: {
             user,
-            likes
+            likes,
+            notifications    
         }
     })
 });
@@ -94,3 +98,11 @@ exports.updateProfile = catchAsync(async(req, res, next) => {
     })
 });
 
+// * Get my notifications 
+exports.visitedNotifications = catchAsync(async (req, res, next) => {
+    await Notification.updateMany({recipient: req.user._id}, {read: true})
+
+    res.status(200).json({
+        message: 'success'
+    })
+});

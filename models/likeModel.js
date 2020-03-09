@@ -14,6 +14,9 @@ const likeSchema = new mongoose.Schema({
     }
 });
 
+likeSchema.pre('save', function() {
+    // console.log(this)
+});
 
 const Like = mongoose.model('Like', likeSchema);
 

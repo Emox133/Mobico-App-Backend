@@ -37,8 +37,8 @@ const importAll = async function() {
 //* Delete all documents in a certain collection
 const deleteAll = async function() {
     try {
-        // await Post.deleteMany()l
-        await User.deleteMany()
+        await Post.deleteMany()
+        // await User.deleteMany()
         console.log('Documents deleted successfully. ❗')
     }
     catch(err) {

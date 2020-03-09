@@ -19,9 +19,7 @@ const notificationSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    postId: {
-        type: mongoose.Schema.ObjectId
-    }
+    type: String
 });
 
 const Notification = mongoose.model('Notification', notificationSchema);
