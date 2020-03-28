@@ -108,10 +108,7 @@ exports.likePost = catchAsync(async(req, res, next) => {
 
     res.status(201).json({
         message: 'success',
-        data: {
-            like,
-            post
-        }
+        data: null
     })
 });
 
@@ -138,12 +135,14 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
         }
         
         // 4. Update the like count in the particular post 
-        await Post.findOneAndUpdate({_id: req.params.id }, {$inc: {likeCount: -1}}, {
+        const post = await Post.findOneAndUpdate({_id: req.params.id }, {$inc: {likeCount: -1}}, {
             new: true,
             runValidators: true
-        });
+        }).select('+ownerId')
+
+        console.log(post)
         
-        await Notification.findOneAndDelete({recipient: req.params.id})
+        await Notification.findOneAndDelete({recipient: post.ownerId})
     
         res.status(201).json({
             message: 'success',
