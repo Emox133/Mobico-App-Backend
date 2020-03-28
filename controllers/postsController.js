@@ -46,6 +46,7 @@ exports.createPost = catchAsync(async(req, res, next) => {
     const newPost = await Post.create({
         owner,
         ownerId: req.user._id,
+        userImage: req.user.userImage,
         text: req.body.text
     })
 
@@ -87,15 +88,15 @@ exports.likePost = catchAsync(async(req, res, next) => {
         return next(new AppError('Post does no longer exist.', 404))
     }
 
+    // 3. Create a like and send the response
+    const like = await Like.create(likeObj)
+    
     // 4. Update the like count in the particular post 
     const post = await Post.findOneAndUpdate({_id: req.params.id}, {$inc: {likeCount: 1}}, {
         new: true,
         runValidators: true
     }).select('+ownerId')
 
-    // 3. Create a like and send the response
-    const like = await Like.create(likeObj)
-    
     //! HAD TO DO THE OPPOSITE
     if(post.ownerId !== like.owner) {
         await Notification.create({
@@ -107,7 +108,10 @@ exports.likePost = catchAsync(async(req, res, next) => {
 
     res.status(201).json({
         message: 'success',
-        data: null
+        data: {
+            like,
+            post
+        }
     })
 });
 

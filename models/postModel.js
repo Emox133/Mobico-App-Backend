@@ -18,6 +18,7 @@ const postsSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    userImage: String,
     likeCount: {
         type: Number,
         default: 0
