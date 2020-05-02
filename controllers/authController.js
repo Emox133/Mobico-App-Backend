@@ -94,7 +94,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     // 1. Get the user coresponding to the inputed email
     const user = await User.findOne({email: req.body.email})
 
-    if(!user) next(new AppError('There is no user with this email adress.', 404));
+    if(!user) return next(new AppError('There is no user with this email adress.', 404));
 
     // 2. Generate a reset token
     const resetToken = user.createPasswordResetToken();
@@ -102,7 +102,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     await user.save({validateBeforeSave: false});
 
     // 3. Send an email to the user
-    const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
+    const resetURL = `${req.protocol}://${req.get('host')}/resetPassword/${resetToken}`;
     const message = `Forgot your password ?! Please send a request with your new password to this route ${resetURL}.\n If you
     did not forgot your password, please ignore this email. ✉`;
 

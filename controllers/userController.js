@@ -1,6 +1,8 @@
 const User = require('./../models/userModel');
 const Like = require('./../models/likeModel');
 const Notification = require('./../models/notificationModel');
+const Post = require('./../models/postModel');
+const Comment = require('./../models/commentModel')
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/AppError');
 const signToken = require('./../utils/signToken');
@@ -57,6 +59,10 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 // * Deactivate/Delete profile
 exports.deleteMe = catchAsync(async (req, res, next) => {
     await User.findByIdAndDelete(req.user._id)
+    await Post.findOneAndDelete({ownerId: req.user._id}).select('+ownerId')
+    await Like.findOneAndDelete({owner: req.user._id})
+    await Comment.findOneAndDelete({owner: req.user._id})
+    await Notification.findOneAndDelete({owner: req.user._id})
 
     res.status(204).json({
         message: 'success',
@@ -89,6 +95,8 @@ exports.updateProfile = catchAsync(async(req, res, next) => {
         new: true,
         runValidators: true
     })
+
+    await Post.updateMany({ownerId: req.user._id}, {userImage: updatedUser.userImage}).select('+ownerId');
 
     res.status(200).json({
         message: 'success',

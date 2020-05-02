@@ -131,7 +131,7 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
         const like = await Like.findOneAndDelete({owner: req.user._id, belongsTo: req.params.id});
         
         if(!like) {
-            return next(new AppError('You cannot dislike a post that you did not liked.', 403));
+            return next(new AppError('You cannot dislike a post that you did not liked.', 406));
         }
         
         // 4. Update the like count in the particular post 
