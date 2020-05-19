@@ -45,7 +45,7 @@ app.all('*', (req, res, next) => {
     res.status(404).json({
         message: `The requested route ${req.originalUrl} is not found.`
     })
-});
+}); 
 
 //! ERRORS
 app.use(globalErrorHandler);
