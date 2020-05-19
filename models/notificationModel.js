@@ -7,9 +7,14 @@ const notificationSchema = new mongoose.Schema({
         required: [true, 'Notification must belong to something.']
     },
     sender: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'User',
+        // type: mongoose.Schema.ObjectId,
+        // ref: 'User',
+        type: String,
         required: [true, 'Notification needs to be created by someone.']
+    },
+    postId: {
+        type: String,
+        required: [true, 'Notification must belong to post.']
     },
     createdAt: {
         type: Date,

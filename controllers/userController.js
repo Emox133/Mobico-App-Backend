@@ -48,21 +48,21 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
     user.confirmPassword = req.body.confirmPassword;
     await user.save()
 
-    const token = signToken(user._id);
+    // const token = signToken(user._id);
 
     res.status(200).json({
-        message: 'success',
-        token
+        message: 'success'
+        // token
     })
 });
 
 // * Deactivate/Delete profile
 exports.deleteMe = catchAsync(async (req, res, next) => {
     await User.findByIdAndDelete(req.user._id)
-    await Post.findOneAndDelete({ownerId: req.user._id}).select('+ownerId')
-    await Like.findOneAndDelete({owner: req.user._id})
-    await Comment.findOneAndDelete({owner: req.user._id})
-    await Notification.findOneAndDelete({owner: req.user._id})
+    await Post.deleteMany({ownerId: req.user._id}).select('+ownerId')
+    await Like.deleteMany({owner: req.user._id})
+    await Comment.deleteMany({owner: req.user._id})
+    await Notification.deleteMany({owner: req.user._id})
 
     res.status(204).json({
         message: 'success',

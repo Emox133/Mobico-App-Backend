@@ -3,14 +3,13 @@ const catchAsync = require('./../utils/catchAsync');
 const jwt = require('jsonwebtoken');
 const AppError = require('./../utils/AppError');
 const {promisify} = require('util');
-const sendEmail = require('./../utils/nodemailer');
+const Email = require('./../utils/nodemailer');
 const crypto = require('crypto');
 const signToken = require('./../utils/signToken')
 
 exports.protectRoutes = catchAsync(async(req, res, next) => {
     // 1. Get the token
     let token;
-
     if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
     }
@@ -21,19 +20,16 @@ exports.protectRoutes = catchAsync(async(req, res, next) => {
 
     // 2. Verify token
     const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-    
     const currentUser = await User.findById(decoded.id);
 
     // 3. Check if user is not deleted in meantime
     if(!currentUser) {
         return next(new AppError('Owner of this token does no longer exist.', 401));
     }
-
     // 4. Check if user changed password in meantime
     if(currentUser.changedPassword(decoded.iat)) {
         return next(new AppError('Password was recently changed, please log in again'));
     }
-
     // Assing currently authenticated user to req.obj and send it further through "stack"
     req.user = currentUser
 
@@ -55,6 +51,9 @@ exports.signup = catchAsync(async(req, res, next) => {
         location: req.body.location,
         website: req.body.website
     });
+
+    const url = `${req.protocol}://${req.get('host')}/me`;
+    await new Email(newUser, url).sendWelcome();
 
     const token = signToken(newUser._id);
 
@@ -102,16 +101,9 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     await user.save({validateBeforeSave: false});
 
     // 3. Send an email to the user
-    const resetURL = `${req.protocol}://${req.get('host')}/resetPassword/${resetToken}`;
-    const message = `Forgot your password ?! Please send a request with your new password to this route ${resetURL}.\n If you
-    did not forgot your password, please ignore this email. ✉`;
-
     try{
-        await sendEmail({
-            email: user.email,
-            subject: 'Your password reset token (available for 10 minutes)',
-            message
-        });
+        const resetURL = `${req.protocol}://${req.get('host')}/resetPassword/${resetToken}`;
+        await new Email(user, resetURL).sendPasswordReset();
 
         res.status(200).json({
             message: 'token sent to email!',
@@ -122,7 +114,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
         user.passwordResetTokenExpiresIn = undefined;
         await user.save({validateBeforeSave: false})
 
-        console.log(err)
+        // console.log(err)
         return next(new AppError('There was an error sending the email. Please try again later.', 500))
     }
 });

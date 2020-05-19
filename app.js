@@ -33,6 +33,4 @@ app.all('*', (req, res, next) => {
 //! ERRORS
 app.use(globalErrorHandler);
 
-console.log(process.env.MODE);
-
 module.exports = app

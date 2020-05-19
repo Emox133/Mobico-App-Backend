@@ -11,6 +11,14 @@ const commentSchema = new mongoose.Schema({
         ref: 'Post',
         required: [true, 'Comment must belong to some post.']
     },
+    ownerImage: {
+        type: String,
+        default: 'https://res.cloudinary.com/de8nlvwpc/image/upload/v1583605946/wpjlsyqsodiokatqqlv4.png'
+    },
+    ownerName: {
+        type: String,
+        default: 'Anonimus'
+    },
     text: {
         type: String,
         required: [true, 'Please provide someting in your comment.']

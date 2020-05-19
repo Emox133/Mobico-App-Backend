@@ -1,26 +1,49 @@
 const nodemailer = require('nodemailer');
+const pug = require('pug')
+const htmlToText = require('html-to-text')
 
-const sendEmail = async options => {
-// 1. Transport
-var transport = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
-    auth: {
-      user: process.env.EMAIL_USERNAME,
-      pass: process.env.EMAIL_PASSWORD
-    }
-  });
+module.exports = class Email {
+  constructor(user, url) {
+    this.to = user.email,
+    this.from = `<${process.env.EMAIL_FROM}>`,
+    this.firstName = user.firstName
+    this.url = url
+  }
 
-// 2. Email options
-const emailOptions = {
-    from: 'Phonico admin team <phonico.admin.team@example.com>',
-    to: options.email,
-    subject: options.subject,
-    text: options.message
-};
+  newTransport() {
+    return nodemailer.createTransport({
+      service: 'SendGrid',
+      auth: {
+        user: process.env.SENDGRID_USERNAME,
+        pass: process.env.SENDGRID_PASSWORD
+      }
+    })
+  }
 
-// 3. Sending
-await transport.sendMail(emailOptions)
-};
+  async send(template, subject) {
+      const html = pug.renderFile(`${__dirname}/../views/email/${template}.pug`, {
+        firstName: this.firstName,
+        url: this.url,
+        subject
+      })
 
-module.exports = sendEmail
+      const emailOptions = {
+        from: this.from,
+        to: this.to,
+        subject,
+        html,
+        text: htmlToText.fromString(html)
+    };
+
+    await this.newTransport().sendMail(emailOptions)
+  }
+
+  async sendWelcome() {
+    await this.send('welcome', 'Welcome to the Mobico Team!')
+  } 
+
+  async sendPasswordReset() {
+    await this.send('passwordReset', 'Password reset token(valid for only 10 minutes)')
+  }
+}
+

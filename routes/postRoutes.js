@@ -20,4 +20,7 @@ router.route('/:id/dislike')
 router.route('/:id/comment')
 .post(authController.protectRoutes, postsController.commentPost)
 
+router.route('/:id/comment/:commentId')
+.delete(authController.protectRoutes, postsController.deleteComment)
+
 module.exports = router;

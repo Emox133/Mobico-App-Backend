@@ -20,12 +20,9 @@ exports.getAllPosts = catchAsync(async (req, res) => {
 
 // * Get one post
 exports.getOnePost = catchAsync(async (req, res, next) => {
-    const post = await Post.findById(req.params.id).select('-__v')
-
+    const post = await Post.findById(req.params.id).select('-__v +ownerId')
     const comments = await Comment.find({belongsTo: req.params.id})
-
     if(!post) next(new AppError('There is no post with this ID.', 404));
-    
     if(!comments) comments = []; 
 
     res.status(200).json({
@@ -78,6 +75,7 @@ exports.likePost = catchAsync(async(req, res, next) => {
     // 1. Get the currently loged in user and the post id
     const likeObj = {
         owner: req.user._id,
+        ownerName: `${req.user.firstName + ' ' + req.user.lastName}`,
         belongsTo: req.params.id
     };
     
@@ -98,17 +96,20 @@ exports.likePost = catchAsync(async(req, res, next) => {
     }).select('+ownerId')
 
     //! HAD TO DO THE OPPOSITE
-    if(post.ownerId !== like.owner) {
+    if(post.owner !== likeObj.ownerName) {
         await Notification.create({
             recipient: post.ownerId,
-            sender: likeObj.owner,
+            sender: likeObj.ownerName,
+            postId: post._id,
             type: 'like'
         })
     }
 
     res.status(201).json({
         message: 'success',
-        data: null
+        data: {
+            like
+        }
     })
 });
 
@@ -140,9 +141,9 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
             runValidators: true
         }).select('+ownerId')
 
-        console.log(post)
+        // console.log(post)
         
-        await Notification.findOneAndDelete({recipient: post.ownerId})
+        // await Notification.findOneAndDelete({recipient: post.ownerId, type: 'like'})
     
         res.status(201).json({
             message: 'success',
@@ -155,6 +156,8 @@ exports.commentPost = catchAsync(async (req, res, next) => {
     // 1. Create an object related to post commenting
     const newComment = {
         owner: req.user._id,
+        ownerName: `${req.user.firstName + ' ' + req.user.lastName}`,
+        ownerImage: req.user.userImage,
         belongsTo: req.params.id,
         text: req.body.text
     };
@@ -166,25 +169,48 @@ exports.commentPost = catchAsync(async (req, res, next) => {
         return next(new AppError('Post does no longer exist.', 404))
     } 
 
+    const comment = await Comment.create(newComment)
+
     // 3. Update the coresponding post
     const post = await Post.findOneAndUpdate({_id: req.params.id}, {$inc: {commentCount: 1}}, {
         new: true,
         runValidators: true
     }).select('+ownerId')
 
-    const comment = await Comment.create(newComment)
+    // let userName = `${req.user.firstName + ' ' + req.user.lastName}`;
+    // console.log(post.owner === newComment.ownerName)
 
-    await Notification.create({
-        recipient: post.ownerId,
-        sender: newComment.owner,
-        type: 'comment'
-    })
-
+    //! HAD TO DO THE OPPOSITE
+    if(post.owner !== newComment.ownerName) {
+        await Notification.create({
+            recipient: post.ownerId,
+            sender: newComment.ownerName,
+            postId: post._id,
+            type: 'comment'
+        })
+    }
+    
     // 4. If we get to this point , send the res
     res.status(201).json({
         message: 'success',
         data: {
             comment
         }
+    })
+});
+
+exports.deleteComment = catchAsync(async (req, res, next) => {
+    await Comment.findOneAndDelete({_id: req.params.commentId, owner: req.user._id})
+    // , (err, res) => err ? console.log(err) : console.log(res)
+
+    const post = await Post.findOneAndUpdate({_id: req.params.id}, {$inc: {commentCount: -1}}, {
+        new: true,
+        runValidators: true
+    }).select('+ownerId')
+
+    // await Notification.findOneAndDelete({recipient: post.ownerId, type: 'comment'})
+
+    res.status(204).json({
+        data: null
     })
 });
