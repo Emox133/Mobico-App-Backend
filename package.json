@@ -1,5 +1,5 @@
 {
-  "name": "phonicoappbackend",
+  "name": "mobicoappbackend",
   "version": "1.0.0",
   "description": "Backend part for the app",
   "main": "app.js",
