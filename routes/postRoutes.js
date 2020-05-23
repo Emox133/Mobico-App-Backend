@@ -13,6 +13,7 @@ router.route('/:id')
 .delete(authController.protectRoutes, postsController.deletePost)
 
 router.route('/:id/like')
+.get(authController.protectRoutes, postsController.likedBy)
 .post(authController.protectRoutes, postsController.likePost)
 router.route('/:id/dislike')
 .post(authController.protectRoutes, postsController.dislikePost)

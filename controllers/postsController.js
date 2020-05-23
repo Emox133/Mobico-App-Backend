@@ -1,8 +1,10 @@
 const Post = require('./../models/postModel');
 const Like = require('./../models/likeModel');
+const User = require('./../models/userModel');
 const Comment = require('./../models/commentModel');
 const Notification = require('./../models/notificationModel');
 const AppError = require('./../utils/AppError');
+const mongoose = require('mongoose');
 const catchAsync = require('./../utils/catchAsync');
 
 //* Get all posts
@@ -109,6 +111,29 @@ exports.likePost = catchAsync(async(req, res, next) => {
         message: 'success',
         data: {
             like
+        }
+    })
+});
+
+exports.likedBy = catchAsync(async (req, res, next) => {
+    // 1. Find all likes related to the particular post via id
+    const likes = await Like.find({belongsTo: req.params.id}).select('+ownerName')
+    if(!likes) return next(new AppError('There are no likes for this post.', 404));
+
+    // 2. Find all users that are the same as the founded Likes owners
+    let ids = [];
+    likes.map(like => {
+        ids.push(like.owner)
+    })
+
+    const users = await User.find().where('_id').in(ids).exec();
+
+    // 3. Send the results back to client store and display them...
+    res.status(200).json({
+        mesage: 'success',
+        data: {
+            likes,
+            users
         }
     })
 });

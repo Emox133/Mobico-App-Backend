@@ -9,6 +9,10 @@ const likeSchema = new mongoose.Schema({
         unique: true,
         sparse: true
     },
+    ownerName: {
+        type: String,
+        select: false
+    },
     belongsTo: {
         type: mongoose.Schema.ObjectId,
         ref: 'Post',
