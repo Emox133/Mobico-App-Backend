@@ -9,7 +9,7 @@ const catchAsync = require('./../utils/catchAsync');
 
 //* Get all posts
 exports.getAllPosts = catchAsync(async (req, res) => {
-    const posts = await Post.find().select('-__v')
+    const posts = await Post.find().select('-__v +ownerId')
 
     res.status(200).json({
         results: posts.length,
