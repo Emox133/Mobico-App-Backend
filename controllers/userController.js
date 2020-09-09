@@ -114,3 +114,14 @@ exports.visitedNotifications = catchAsync(async (req, res, next) => {
         message: 'success'
     })
 });
+
+// Visit profiles route
+exports.visitProfiles = catchAsync(async (req, res, next) => {
+    const userId = req.params.id
+    const user = await User.findById(userId)
+
+    res.status(200).json({
+        message: 'success',
+        user
+    })
+})

@@ -17,6 +17,9 @@ router.route('/resetPassword/:token')
 router.route('/me')
 .get(authController.protectRoutes, userController.getUserData)
 
+router.route('/:id')
+.get(authController.protectRoutes, userController.visitProfiles)
+
 router.route('/updateMyPassword')
 .patch(authController.protectRoutes, userController.updatePassword)
 router.route('/updateMe')
