@@ -1,5 +1,6 @@
 const express = require('express');
-const morgan = require('morgan');
+// const morgan = require('morgan');
+const cors = require('cors')
 const postsRouter = require('./routes/postRoutes');
 const usersRouter = require('./routes/userRoutes');
 const globalErrorHandler = require('./controllers/errorController');
@@ -12,6 +13,8 @@ const xss = require('xss-clean')
 const compression = require('compression')
 
 const app = express();
+app.use(cors())
+
 app.use(helmet());
 
 app.use(express.json());
