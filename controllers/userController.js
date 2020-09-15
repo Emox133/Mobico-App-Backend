@@ -79,6 +79,7 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
     await Like.deleteMany({owner: req.user._id})
     await Comment.deleteMany({owner: req.user._id})
     await Notification.deleteMany({owner: req.user._id})
+    await Friends.deleteMany({requestSender: req.user._id})
 
     res.status(204).json({
         message: 'success',
