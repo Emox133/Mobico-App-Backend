@@ -3,6 +3,8 @@ const Like = require('./../models/likeModel');
 const Notification = require('./../models/notificationModel');
 const Post = require('./../models/postModel');
 const Comment = require('./../models/commentModel')
+const Friends = require('./../models/friendsModel')
+const MyFriends = require('./../models/myFriendsModel')
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/AppError');
 const signToken = require('./../utils/signToken');
@@ -18,10 +20,22 @@ const cloudinary = require('cloudinary').v2;
     return newObj
 };
 
+exports.getAllUsers = catchAsync(async (req, res, next) => {
+    const users = await User.find().select('-__v -passwordChangedAt')
+
+    res.status(200).json({
+        message: 'success',
+        results: users.length,
+        users
+    })
+})
+
 exports.getUserData = catchAsync(async(req, res, next) => {
     const user = await User.findById(req.user._id).select('-__v');
     const likes = await Like.find({owner: req.user._id})
     const notifications = await Notification.find({recipient: req.user._id})
+    const friendRequests = await Friends.find({requestSender: req.user._id})
+    // const myFriends = await Friends.find({requestSender: req.user._id, accepted: true})
 
     if(!likes) likes = [];
     if(!notifications) notifications = [];
@@ -31,7 +45,9 @@ exports.getUserData = catchAsync(async(req, res, next) => {
         data: {
             user,
             likes,
-            notifications    
+            notifications,
+            friendRequests
+            // myFriends
         }
     })
 });
@@ -108,7 +124,7 @@ exports.updateProfile = catchAsync(async(req, res, next) => {
 
 // * Get my notifications 
 exports.visitedNotifications = catchAsync(async (req, res, next) => {
-    await Notification.updateMany({recipient: req.user._id}, {read: true})
+    await Notification.updateMany({recipientUser: req.user._id}, {read: true})
 
     res.status(200).json({
         message: 'success'
@@ -125,3 +141,133 @@ exports.visitProfiles = catchAsync(async (req, res, next) => {
         user
     })
 })
+
+// * FRIEND REQUESTS
+exports.sendFriendRequest = catchAsync(async (req, res, next) => {
+    const requestToSend = {
+        requestSender: req.user._id,
+        requestReceiver: req.params.id
+        // requestSent: true
+    }
+
+    const friendRequest = await Friends.create(requestToSend)
+
+    res.status(201).json({
+        message: 'success',
+        friendRequest
+    })
+})
+
+exports.getMyFriendRequests = catchAsync(async (req, res, next) => {
+    const friendRequests = await Friends.find({requestReceiver: req.user._id, accepted: false})
+
+    let ids = []
+
+    friendRequests.map(request => {
+        ids.push(request.requestSender)
+    })
+
+    const senders = await User.find().select('-__v').where('_id').in(ids).exec()
+
+    res.status(200).json({
+        message: 'success',
+        friendRequests,
+        senders
+    })
+})
+
+exports.undoFriendRequest = catchAsync(async (req, res, next) => {
+    // const deletedRequest = await Friends.findOneAndDelete({requestReceiver: req.params.id})
+    const deletedRequest = await Friends.findOneAndDelete({
+        $or: [{requestReceiver: req.params.id}, {requestSender: req.params.id}] 
+    })
+
+    res.status(204).json({
+        message: 'success',
+        deletedRequest
+    })
+})
+
+exports.friendRequestsIaccepted = catchAsync(async (req, res, next) => {
+    const acceptedRequests = await Friends.find({requestReceiver: req.user._id, accepted: true})    
+
+    res.status(200).json({
+        message: 'success',
+        acceptedRequests
+    })
+})
+
+exports.acceptedMyFriendRequests = catchAsync(async (req, res, next) => {
+    const acceptedRequests = await Friends.find({accepted: true})
+    let friendsIds = []
+
+    friendsIds.push(req.user._id)
+
+    acceptedRequests.map(r => {
+        let strReqReceiver = String(r.requestReceiver)      
+        let strReqSender = String(r.requestSender)      
+        let myId = String(req.user._id)
+
+        if(strReqSender === myId) {
+            friendsIds.push(r.requestReceiver)
+        } else if(strReqReceiver === myId) {
+            friendsIds.push(r.requestSender)
+        } 
+    })
+
+    const friendsPosts = await Post.find().select('+ownerId').where('ownerId').in(friendsIds).exec()
+
+    res.status(200).json({
+        message: 'success',
+        // acceptedRequests,
+        friendsPosts
+    })
+})
+
+exports.acceptFriendRequest = catchAsync(async (req, res, next) => {
+    let query = {
+        requestSender: req.params.id,
+        requestReceiver: req.user._id
+    }
+
+    const acceptedRequest = await Friends.findOneAndUpdate(query, {accepted: true}, {
+        new: true,
+        runValidators: true
+    })
+
+    await Notification.create({
+        recipient: req.params.id,
+        sender: req.user.username,
+        postId: req.params.id,
+        type: 'friend-request'
+    })
+
+    res.status(200).json({
+        message: 'success',
+        acceptedRequest
+    })
+})
+
+// exports.myFriends = catchAsync(async (req, res, next) => {
+//     const acceptedRequests = await Friends.find({accepted: true})
+//     let friendsIds = []
+
+//     acceptedRequests.map(r => {
+//         let strReqReceiver = String(r.requestReceiver)      
+//         let strReqSender = String(r.requestSender)      
+//         let myId = String(req.user._id)
+
+//         if(strReqSender === myId) {
+//             friendsIds.push(r.requestReceiver)
+//         } else if(strReqReceiver === myId) {
+//             friendsIds.push(r.requestSender)
+//         } 
+//     })
+
+//     const friendsFetched = await User.find().where('_id').in(friendsIds).exec()
+
+//     res.status(200).json({
+//         message: 'success',
+//         friendsFetched
+//     })
+// })
