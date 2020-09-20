@@ -27,6 +27,7 @@ const port = process.env.PORT || 3000;
 const server = app.listen(port, () => console.log(`Server started on port ${port}...`));
 
 const io = require('socket.io')(server)
+io.set('origins', '*:*')
 io.on('connection', socket => {
   const id = socket.handshake.query.id
   socket.join(id)
