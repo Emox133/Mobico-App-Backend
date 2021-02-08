@@ -165,8 +165,6 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
             new: true,
             runValidators: true
         }).select('+ownerId')
-
-        // console.log(post)
         
         // await Notification.findOneAndDelete({recipient: post.ownerId, type: 'like'})
     

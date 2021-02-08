@@ -21,12 +21,15 @@ router.route('/me')
 router.route('/deleteMe')
 .delete(authController.protectRoutes, userController.deleteMe)
 
+router.route('/updateMyPassword')
+.patch(authController.protectRoutes, userController.updatePassword)
+router.route('/updateMe')
+.patch(authController.protectRoutes, userController.updateProfile)
+
 router.route('/friend-requests')
 .get(authController.protectRoutes, userController.getMyFriendRequests)
-
 router.route('/friends')
 .get(authController.protectRoutes, userController.acceptedMyFriendRequests)
-
 router.route('/my-friends')
 .get(authController.protectRoutes, userController.friendRequestsIaccepted)
 
@@ -35,11 +38,6 @@ router.route('/:id')
 .post(authController.protectRoutes, userController.sendFriendRequest)
 .delete(authController.protectRoutes, userController.undoFriendRequest)
 .patch(authController.protectRoutes, userController.acceptFriendRequest)
-
-router.route('/updateMyPassword')
-.patch(authController.protectRoutes, userController.updatePassword)
-router.route('/updateMe')
-.patch(authController.protectRoutes, userController.updateProfile)
 
 router.route('/notifications')
 .patch(authController.protectRoutes, userController.visitedNotifications)

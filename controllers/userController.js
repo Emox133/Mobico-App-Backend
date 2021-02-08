@@ -4,12 +4,13 @@ const Notification = require('./../models/notificationModel');
 const Post = require('./../models/postModel');
 const Comment = require('./../models/commentModel')
 const Friends = require('./../models/friendsModel')
-const MyFriends = require('./../models/myFriendsModel')
+// const MyFriends = require('./../models/myFriendsModel')
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/AppError');
 const signToken = require('./../utils/signToken');
 const {uploadProfileImage} = require('./../utils/multer-alt');
 const cloudinary = require('cloudinary').v2;
+const mongoose = require('mongoose')
 
 // Choose which fields are allowed to be updated
  const filteredBody = (obj, ...allowedFields) => {
@@ -182,7 +183,7 @@ exports.undoFriendRequest = catchAsync(async (req, res, next) => {
     const deletedRequest = await Friends.findOneAndDelete({
         $or: [{requestReceiver: req.params.id}, {requestSender: req.params.id}] 
     })
-
+    
     res.status(204).json({
         message: 'success',
         deletedRequest
@@ -249,26 +250,4 @@ exports.acceptFriendRequest = catchAsync(async (req, res, next) => {
     })
 })
 
-// exports.myFriends = catchAsync(async (req, res, next) => {
-//     const acceptedRequests = await Friends.find({accepted: true})
-//     let friendsIds = []
 
-//     acceptedRequests.map(r => {
-//         let strReqReceiver = String(r.requestReceiver)      
-//         let strReqSender = String(r.requestSender)      
-//         let myId = String(req.user._id)
-
-//         if(strReqSender === myId) {
-//             friendsIds.push(r.requestReceiver)
-//         } else if(strReqReceiver === myId) {
-//             friendsIds.push(r.requestSender)
-//         } 
-//     })
-
-//     const friendsFetched = await User.find().where('_id').in(friendsIds).exec()
-
-//     res.status(200).json({
-//         message: 'success',
-//         friendsFetched
-//     })
-// })

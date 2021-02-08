@@ -1,4 +1,5 @@
 const AppError = require('./../utils/AppError');
+const cloudinary = require('cloudinary').v2
 
 exports.uploadProfileImage = req => {
     const ext = req.files.photo.mimetype.split('/')[1];
