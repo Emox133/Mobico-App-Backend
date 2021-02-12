@@ -37,7 +37,7 @@ exports.getUserData = catchAsync(async(req, res, next) => {
     const notifications = await Notification.find({recipient: req.user._id})
     const friendRequests = await Friends.find({requestSender: req.user._id})
     // const myFriends = await Friends.find({requestSender: req.user._id, accepted: true})
-
+    
     if(!likes) likes = [];
     if(!notifications) notifications = [];
 
@@ -126,7 +126,7 @@ exports.updateProfile = catchAsync(async(req, res, next) => {
 
 // * Get my notifications 
 exports.visitedNotifications = catchAsync(async (req, res, next) => {
-    await Notification.updateMany({recipientUser: req.user._id}, {read: true})
+    await Notification.updateMany({recipient: req.user._id}, {read: true})
 
     res.status(200).json({
         message: 'success'

@@ -26,6 +26,9 @@ router.route('/updateMyPassword')
 router.route('/updateMe')
 .patch(authController.protectRoutes, userController.updateProfile)
 
+router.route('/notifications')
+.patch(authController.protectRoutes, userController.visitedNotifications)
+
 router.route('/friend-requests')
 .get(authController.protectRoutes, userController.getMyFriendRequests)
 router.route('/friends')
@@ -38,8 +41,5 @@ router.route('/:id')
 .post(authController.protectRoutes, userController.sendFriendRequest)
 .delete(authController.protectRoutes, userController.undoFriendRequest)
 .patch(authController.protectRoutes, userController.acceptFriendRequest)
-
-router.route('/notifications')
-.patch(authController.protectRoutes, userController.visitedNotifications)
 
 module.exports = router;
