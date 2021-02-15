@@ -29,6 +29,10 @@ const postsSchema = new mongoose.Schema({
     }
 });
 
+// postsSchema.virtual('comments', {
+//     foreignKey: 
+// })
+
 const Post = mongoose.model('Post', postsSchema);
 
 module.exports = Post;

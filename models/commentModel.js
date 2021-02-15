@@ -1,21 +1,21 @@
 const mongoose = require('mongoose');
 
 const commentSchema = new mongoose.Schema({
-    owner: {
+    user: {
         type: mongoose.Schema.ObjectId,
         ref: 'User',
         required: [true, 'Comment must belong to some user.']
     },
-    belongsTo: {
+    post: {
         type: mongoose.Schema.ObjectId,
         ref: 'Post',
         required: [true, 'Comment must belong to some post.']
     },
-    ownerImage: {
+    userImage: {
         type: String,
         default: 'https://res.cloudinary.com/de8nlvwpc/image/upload/v1583605946/wpjlsyqsodiokatqqlv4.png'
     },
-    ownerName: {
+    nameOfUser: {
         type: String,
         default: 'Anonimus'
     },

@@ -78,7 +78,7 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
     await User.findByIdAndDelete(req.user._id)
     await Post.deleteMany({ownerId: req.user._id}).select('+ownerId')
     await Like.deleteMany({owner: req.user._id})
-    await Comment.deleteMany({owner: req.user._id})
+    await Comment.deleteMany({user: req.user._id})
     await Notification.deleteMany({owner: req.user._id})
     await Friends.deleteMany({requestSender: req.user._id})
 

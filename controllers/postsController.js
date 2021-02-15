@@ -23,7 +23,7 @@ exports.getAllPosts = catchAsync(async (req, res) => {
 // * Get one post
 exports.getOnePost = catchAsync(async (req, res, next) => {
     const post = await Post.findById(req.params.id).select('-__v +ownerId')
-    const comments = await Comment.find({belongsTo: req.params.id})
+    const comments = await Comment.find({post: req.params.id}).select('-__v')
     if(!post) next(new AppError('There is no post with this ID.', 404));
     if(!comments) comments = []; 
 
@@ -61,7 +61,7 @@ exports.createPost = catchAsync(async(req, res, next) => {
 exports.deletePost = catchAsync(async(req, res, next) => {
     const post = await Post.findOneAndDelete({ownerId: req.user._id, _id: req.params.id})
     await Like.deleteMany({belongsTo: req.params.id})
-    await Comment.deleteMany({belongsTo: req.params.id})
+    await Comment.deleteMany({post: req.params.id})
     await Notification.deleteMany({recipient: req.user._id})
 
     if(!post) return next(new AppError('You do not have permission to perform this kind of operation.', 403))
@@ -178,17 +178,17 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
 exports.commentPost = catchAsync(async (req, res, next) => {
     // 1. Create an object related to post commenting
     const newComment = {
-        owner: req.user._id,
-        ownerName: `${req.user.firstName + ' ' + req.user.lastName}`,
-        ownerImage: req.user.userImage,
-        belongsTo: req.params.id,
+        user: req.user._id,
+        nameOfUser: `${req.user.firstName + ' ' + req.user.lastName}`,
+        userImage: req.user.userImage,
+        post: req.params.id,
         text: req.body.text
     };
     
     // 2. Check if related data still exists
-    if(!newComment.owner) {
+    if(!newComment.user) {
         return next(new AppError('User does no longer exist.', 404))
-    } else if (!newComment.belongsTo) {
+    } else if (!newComment.post) {
         return next(new AppError('Post does no longer exist.', 404))
     } 
 
@@ -204,10 +204,10 @@ exports.commentPost = catchAsync(async (req, res, next) => {
     // console.log(post.owner === newComment.ownerName)
 
     //! HAD TO DO THE OPPOSITE
-    if(post.owner !== newComment.ownerName) {
+    if(post.owner !== newComment.nameOfUser) {
         await Notification.create({
             recipient: post.ownerId,
-            sender: newComment.ownerName,
+            sender: newComment.nameOfUser,
             postId: post._id,
             type: 'comment'
         })
@@ -223,10 +223,10 @@ exports.commentPost = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteComment = catchAsync(async (req, res, next) => {
-    await Comment.findOneAndDelete({_id: req.params.commentId, owner: req.user._id})
+    await Comment.findOneAndDelete({_id: req.params.commentId, user: req.user._id})
     // , (err, res) => err ? console.log(err) : console.log(res)
 
-    const post = await Post.findOneAndUpdate({_id: req.params.id}, {$inc: {commentCount: -1}}, {
+    await Post.findOneAndUpdate({_id: req.params.id}, {$inc: {commentCount: -1}}, {
         new: true,
         runValidators: true
     }).select('+ownerId')
