@@ -36,7 +36,6 @@ exports.getUserData = catchAsync(async(req, res, next) => {
     const likes = await Like.find({owner: req.user._id})
     const notifications = await Notification.find({recipient: req.user._id})
     const friendRequests = await Friends.find({requestSender: req.user._id})
-    // const myFriends = await Friends.find({requestSender: req.user._id, accepted: true})
     
     if(!likes) likes = [];
     if(!notifications) notifications = [];
@@ -48,7 +47,6 @@ exports.getUserData = catchAsync(async(req, res, next) => {
             likes,
             notifications,
             friendRequests
-            // myFriends
         }
     })
 });
@@ -76,15 +74,14 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 // * Deactivate/Delete profile
 exports.deleteMe = catchAsync(async (req, res, next) => {
     await User.findByIdAndDelete(req.user._id)
-    await Post.deleteMany({ownerId: req.user._id}).select('+ownerId')
+    await Post.deleteMany({userId: req.user._id}).select('+ownerId')
     await Like.deleteMany({owner: req.user._id})
     await Comment.deleteMany({user: req.user._id})
     await Notification.deleteMany({owner: req.user._id})
     await Friends.deleteMany({requestSender: req.user._id})
 
     res.status(204).json({
-        message: 'success',
-        data: null
+        message: 'success'
     })
 });
 
@@ -114,7 +111,7 @@ exports.updateProfile = catchAsync(async(req, res, next) => {
         runValidators: true
     })
 
-    await Post.updateMany({ownerId: req.user._id}, {userImage: updatedUser.userImage}).select('+ownerId');
+    await Post.updateMany({userId: req.user._id}, {userImage: updatedUser.userImage}).select('+ownerId');
 
     res.status(200).json({
         message: 'success',
@@ -149,7 +146,6 @@ exports.sendFriendRequest = catchAsync(async (req, res, next) => {
     const requestToSend = {
         requestSender: req.user._id,
         requestReceiver: req.params.id
-        // requestSent: true
     }
 
     const friendRequest = await Friends.create(requestToSend)
@@ -179,7 +175,6 @@ exports.getMyFriendRequests = catchAsync(async (req, res, next) => {
 })
 
 exports.undoFriendRequest = catchAsync(async (req, res, next) => {
-    // const deletedRequest = await Friends.findOneAndDelete({requestReceiver: req.params.id})
     const deletedRequest = await Friends.findOneAndDelete({
         $or: [{requestReceiver: req.params.id}, {requestSender: req.params.id}] 
     })
@@ -217,11 +212,10 @@ exports.acceptedMyFriendRequests = catchAsync(async (req, res, next) => {
         } 
     })
 
-    const friendsPosts = await Post.find().select('+ownerId').where('ownerId').in(friendsIds).exec()
+    const friendsPosts = await Post.find().select('+userId').where('userId').in(friendsIds).exec()
 
     res.status(200).json({
         message: 'success',
-        // acceptedRequests,
         friendsPosts
     })
 })

@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const fs = require('fs');
 const Post = require('./../models/postModel');
 const User = require('./../models/userModel');
+const Notification = require('./../models/notificationModel')
 
 dotenv.config({
     path: './config.env'
@@ -22,7 +23,7 @@ mongoose.connect(DB, {
 }).then(() => console.log('DB connection successfull...'))
 
 //* Import all documents to a certain collection
-const importAll = async function() {
+const importAllPosts = async function() {
     try {
         // await Post.create(posts)
         await User.create(users)
@@ -35,7 +36,7 @@ const importAll = async function() {
 };
 
 //* Delete all documents in a certain collection
-const deleteAll = async function() {
+const deleteAllPosts = async function() {
     try {
         await Post.deleteMany()
         // await User.deleteMany()
@@ -47,10 +48,25 @@ const deleteAll = async function() {
     process.exit(0);
 };
 
-if(process.argv[2] === '--import') {
-    importAll();
-} else if (process.argv[2] === '--delete') {
-    deleteAll();
-} 
+const deleteAllNotifications = async function() {
+    try {
+        await Notification.deleteMany()
+        // await User.deleteMany()
+        console.log('Notifications deleted successfully. ❗')
+    }
+    catch(err) {
+        console.error(err);
+    }
+    process.exit(0);
+};
+
+if(process.argv[2] === '--import-P') {
+    importAllPosts();
+} else if (process.argv[2] === '--delete-P') {
+    deleteAllPosts();
+} else if(process.argv[2] === '--delete-N') {
+    deleteAllNotifications()
+}
+
 
 

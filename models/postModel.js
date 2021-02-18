@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 
 const postsSchema = new mongoose.Schema({
-    owner: {
+    user: {
         type: String,
         required: [true, 'A post has to have an owner']
     },
-    ownerId: {
+    userId: {
         type: mongoose.Schema.ObjectId,
         select: false
     },

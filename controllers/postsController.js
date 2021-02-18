@@ -4,12 +4,11 @@ const User = require('./../models/userModel');
 const Comment = require('./../models/commentModel');
 const Notification = require('./../models/notificationModel');
 const AppError = require('./../utils/AppError');
-const mongoose = require('mongoose');
 const catchAsync = require('./../utils/catchAsync');
 
 //* Get all posts
 exports.getAllPosts = catchAsync(async (req, res) => {
-    const posts = await Post.find().select('-__v +ownerId')
+    const posts = await Post.find().select('-__v')
 
     res.status(200).json({
         results: posts.length,
@@ -22,7 +21,7 @@ exports.getAllPosts = catchAsync(async (req, res) => {
 
 // * Get one post
 exports.getOnePost = catchAsync(async (req, res, next) => {
-    const post = await Post.findById(req.params.id).select('-__v +ownerId')
+    const post = await Post.findById(req.params.id).select('-__v')
     const comments = await Comment.find({post: req.params.id}).select('-__v')
     if(!post) next(new AppError('There is no post with this ID.', 404));
     if(!comments) comments = []; 
@@ -38,13 +37,11 @@ exports.getOnePost = catchAsync(async (req, res, next) => {
 
 // * Create a post
 exports.createPost = catchAsync(async(req, res, next) => {
-    let person = [req.user.firstName, req.user.lastName];
-    person = person.toString();
-    const owner = person.split(',').join(' '); 
+    let user = [req.user.firstName, req.user.lastName].toString().split`,`.join` `
 
     const newPost = await Post.create({
-        owner,
-        ownerId: req.user._id,
+        user,
+        userId: req.user._id,
         userImage: req.user.userImage,
         text: req.body.text
     })
@@ -59,7 +56,7 @@ exports.createPost = catchAsync(async(req, res, next) => {
 
 // * Delete Post
 exports.deletePost = catchAsync(async(req, res, next) => {
-    const post = await Post.findOneAndDelete({ownerId: req.user._id, _id: req.params.id})
+    const post = await Post.findOneAndDelete({userId: req.user._id, _id: req.params.id})
     await Like.deleteMany({belongsTo: req.params.id})
     await Comment.deleteMany({post: req.params.id})
     await Notification.deleteMany({recipient: req.user._id})
@@ -67,8 +64,7 @@ exports.deletePost = catchAsync(async(req, res, next) => {
     if(!post) return next(new AppError('You do not have permission to perform this kind of operation.', 403))
 
     res.status(204).json({
-        message: 'success',
-        data: null
+        message: 'success'
     })
 });
 
@@ -95,12 +91,12 @@ exports.likePost = catchAsync(async(req, res, next) => {
     const post = await Post.findOneAndUpdate({_id: req.params.id}, {$inc: {likeCount: 1}}, {
         new: true,
         runValidators: true
-    }).select('+ownerId')
+    }).select('+userId')
 
-    //! HAD TO DO THE OPPOSITE
-    if(post.owner !== likeObj.ownerName) {
+    //! HAD TO DO THE OPPOSITE // CHANGE LATTER
+    if(post.user !== likeObj.ownerName) {
         await Notification.create({
-            recipient: post.ownerId,
+            recipient: post.userId,
             sender: likeObj.ownerName,
             postId: post._id,
             type: 'like'
@@ -161,16 +157,13 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
         }
         
         // 4. Update the like count in the particular post 
-        const post = await Post.findOneAndUpdate({_id: req.params.id }, {$inc: {likeCount: -1}}, {
+        await Post.findOneAndUpdate({_id: req.params.id }, {$inc: {likeCount: -1}}, {
             new: true,
             runValidators: true
         }).select('+ownerId')
-        
-        // await Notification.findOneAndDelete({recipient: post.ownerId, type: 'like'})
-    
+            
         res.status(201).json({
-            message: 'success',
-            data: null
+            message: 'success'
         })
 });
 
@@ -198,15 +191,12 @@ exports.commentPost = catchAsync(async (req, res, next) => {
     const post = await Post.findOneAndUpdate({_id: req.params.id}, {$inc: {commentCount: 1}}, {
         new: true,
         runValidators: true
-    }).select('+ownerId')
+    }).select('+userId')
 
-    // let userName = `${req.user.firstName + ' ' + req.user.lastName}`;
-    // console.log(post.owner === newComment.ownerName)
-
-    //! HAD TO DO THE OPPOSITE
-    if(post.owner !== newComment.nameOfUser) {
+    //! HAD TO DO THE OPPOSITE // CHANGE LATTER
+    if(post.user !== newComment.nameOfUser) {
         await Notification.create({
-            recipient: post.ownerId,
+            recipient: post.userId,
             sender: newComment.nameOfUser,
             postId: post._id,
             type: 'comment'
@@ -224,16 +214,13 @@ exports.commentPost = catchAsync(async (req, res, next) => {
 
 exports.deleteComment = catchAsync(async (req, res, next) => {
     await Comment.findOneAndDelete({_id: req.params.commentId, user: req.user._id})
-    // , (err, res) => err ? console.log(err) : console.log(res)
 
     await Post.findOneAndUpdate({_id: req.params.id}, {$inc: {commentCount: -1}}, {
         new: true,
         runValidators: true
     }).select('+ownerId')
 
-    // await Notification.findOneAndDelete({recipient: post.ownerId, type: 'comment'})
-
     res.status(204).json({
-        data: null
+        message: 'success'
     })
 });
